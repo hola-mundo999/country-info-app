@@ -86,16 +86,16 @@ async function getCountryInfo(countryName) {
         let country = data[0];
 
         // display data
-        document.getElementById("country-name").textContent     = country.name.common;
-        document.getElementById("country-official").textContent = country.name.official;
-        document.getElementById("capital").textContent          = country.capital[0];
-        document.getElementById("population").textContent       = country.population.toLocaleString();
-        document.getElementById("region").textContent           = country.region;
-        document.getElementById("flag").src                     = country.flags.png;
+        document.getElementById("country-name").textContent     = country.name?.common || countryName;
+        document.getElementById("country-official").textContent = country.name?.official || countryName;
+        document.getElementById("capital").textContent          = country.capital?.[0] || 'N/A';
+        document.getElementById("population").textContent       = (country.population || 0).toLocaleString();
+        document.getElementById("region").textContent           = country.region || 'Global';
+        document.getElementById("flag").src                     = country.flags?.png || country.flags?.svg || '';
 
         // ── FEATURE 2: Currency ──
-        let currencyData = Object.values(country.currencies)[0];
-        document.getElementById("currency").textContent = `${currencyData.name} (${currencyData.symbol})`;
+        let currencyData = country.currencies ? Object.values(country.currencies)[0] : null;
+        document.getElementById("currency").textContent = currencyData ? `${currencyData.name || ''} (${currencyData.symbol || ''})` : 'N/A';
 
         // show card
         document.getElementById("country-card").classList.add("visible");
