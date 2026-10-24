@@ -3,546 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Search any country in the world — capital, population, currency, languages, area and more, live from REST Countries.">
   <title>Country Explorer</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    /* ── RESET & TOKENS ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --ink:        #0c0c14;
-      --ink-soft:   #3d3d52;
-      --ink-muted:  #8888a4;
-      --paper:      #f5f4ef;
-      --paper-warm: #eeebd8;
-      --cream:      #faf9f5;
-      --accent:     #1a56ff;
-      --accent-dim: #d6e0ff;
-      --gold:       #c9922a;
-      --gold-light: #f7e9cc;
-      --success:    #1a7a4a;
-      --danger:     #c0392b;
-      --border:     rgba(12,12,20,0.1);
-      --shadow-sm:  0 2px 8px rgba(12,12,20,0.08);
-      --shadow-md:  0 8px 32px rgba(12,12,20,0.12);
-      --shadow-lg:  0 24px 64px rgba(12,12,20,0.16);
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--paper);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 400;
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ── BACKGROUND TEXTURE ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 15% 20%, rgba(26,86,255,0.06) 0%, transparent 50%),
-        radial-gradient(circle at 85% 80%, rgba(201,146,42,0.08) 0%, transparent 50%),
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230c0c14' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .page-wrap {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 24px 80px;
-    }
-
-    /* ── HEADER ── */
-    .site-header {
-      padding: 48px 0 40px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      border-bottom: 1.5px solid var(--border);
-      margin-bottom: 52px;
-      animation: fadeDown 0.6s ease both;
-    }
-
-    
-
-    .logo-eyebrow {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 6px;
-    }
-
-    .logo-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 42px;
-      font-weight: 900;
-      color: var(--ink);
-      line-height: 1;
-      letter-spacing: -0.02em;
-    }
-
-    .logo-title span {
-      color: var(--accent);
-    }
-
-    .header-meta {
-      text-align: right;
-    }
-
-    .header-meta-label {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--ink-muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .header-api-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--ink);
-      color: #fff;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      padding: 5px 12px;
-      border-radius: 100px;
-    }
-
-    .api-dot {
-      width: 6px;
-      height: 6px;
-      background: #4ade80;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    /* ── SEARCH SECTION ── */
-    .search-section {
-      margin-bottom: 52px;
-      animation: fadeUp 0.6s ease 0.1s both;
-    }
-
-    .search-label {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 16px;
-    }
-
-    .search-label span {
-      color: var(--ink-muted);
-      font-weight: 400;
-      font-style: italic;
-    }
-
-    .search-row {
-      display: flex;
-      gap: 0;
-      background: #fff;
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
-      transition: box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-
-    .search-row:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px var(--accent-dim), var(--shadow-md);
-    }
-
-    #search-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      padding: 18px 22px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 400;
-      color: var(--ink);
-      background: transparent;
-      letter-spacing: 0.01em;
-    }
-
-    #search-input::placeholder {
-      color: var(--ink-muted);
-      font-style: italic;
-    }
-
-    #search-btn {
-      border: none;
-      outline: none;
-      cursor: pointer;
-      background: var(--ink);
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      padding: 18px 28px;
-      transition: background 0.2s ease, transform 0.1s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-
-    #search-btn:hover { background: var(--accent); }
-    #search-btn:active { transform: scale(0.98); }
-
-    .search-icon {
-      font-size: 16px;
-    }
-
-    /* ── ERROR ── */
-    #error {
-      margin-top: 12px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--danger);
-      min-height: 20px;
-      font-family: 'JetBrains Mono', monospace;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    #error.visible { opacity: 1; }
-
-    /* ── LOADING STATE ── */
-    #loading {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--ink-muted);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    #loading.visible { display: flex; }
-
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    /* ── COUNTRY CARD ── */
-    #country-card {
-      display: none;
-      background: #fff;
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-      margin-bottom: 52px;
-      animation: fadeUp 0.5s ease both;
-    }
-
-    #country-card.visible { display: block; }
-
-    .card-header {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: start;
-      gap: 24px;
-      padding: 32px 36px;
-      border-bottom: 1.5px solid var(--border);
-      background: var(--cream);
-    }
-
-    /* .card-name-block {} */
-
-    .card-eyebrow {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 8px;
-    }
-
-    #country-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 38px;
-      font-weight: 900;
-      color: var(--ink);
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: 8px;
-    }
-
-    #country-official {
-      font-size: 13px;
-      color: var(--ink-muted);
-      font-style: italic;
-    }
-
-    .flag-wrap {
-      width: 120px;
-      height: 80px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      flex-shrink: 0;
-    }
-
-    #flag {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .card-body {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0;
-    }
-
-    .stat-cell {
-      padding: 24px 28px;
-      border-right: 1.5px solid var(--border);
-      transition: background 0.2s ease;
-    }
-
-    .stat-cell:last-child { border-right: none; }
-    .stat-cell:hover { background: var(--cream); }
-
-    .stat-icon {
-      font-size: 20px;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    .stat-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--ink-muted);
-      margin-bottom: 4px;
-    }
-
-    .stat-value {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--ink);
-      line-height: 1.3;
-    }
-
-    .card-footer {
-      padding: 18px 28px;
-      border-top: 1.5px solid var(--border);
-      background: var(--paper);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card-footer-left {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--ink-muted);
-    }
-
-    .card-footer-left span {
-      color: var(--success);
-      font-weight: 600;
-    }
-
-    .region-badge {
-      background: var(--accent-dim);
-      color: var(--accent);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 5px 12px;
-      border-radius: 100px;
-    }
-
-    /* ── HISTORY SECTION ── */
-    .history-section {
-      animation: fadeUp 0.6s ease 0.2s both;
-    }
-
-    .history-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-
-    .history-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    #clear-history {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 5px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--ink-muted);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    #clear-history:hover {
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
-    #history {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      min-height: 44px;
-    }
-
-    .history-empty {
-      font-size: 13px;
-      color: var(--ink-muted);
-      font-style: italic;
-      padding: 10px 0;
-    }
-
-    .history-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fff;
-      border: 1.5px solid var(--border);
-      border-radius: 100px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--ink);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: var(--shadow-sm);
-      animation: popIn 0.3s ease both;
-    }
-
-    .history-chip:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .history-chip .chip-icon { font-size: 14px; }
-
-    /* ── SUGGESTIONS ROW ── */
-    .suggestions-section {
-      margin-bottom: 52px;
-      animation: fadeUp 0.6s ease 0.15s both;
-    }
-
-    .suggestions-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--ink-muted);
-      margin-bottom: 12px;
-    }
-
-    .suggestions-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .suggestion-btn {
-      background: var(--paper-warm);
-      border: 1px solid rgba(201,146,42,0.2);
-      border-radius: 100px;
-      padding: 7px 16px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--gold);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .suggestion-btn:hover {
-      background: var(--gold-light);
-      border-color: var(--gold);
-      transform: translateY(-1px);
-    }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.85); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
-      .logo-title { font-size: 32px; }
-      .site-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .header-meta { text-align: left; }
-      .card-body { grid-template-columns: 1fr 1fr; }
-      .stat-cell:nth-child(2) { border-right: none; }
-      .stat-cell:nth-child(3) { border-right: none; border-top: 1.5px solid var(--border); grid-column: span 2; }
-      .card-header { grid-template-columns: 1fr; }
-      .flag-wrap { width: 100%; height: 160px; }
-      #country-name { font-size: 28px; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -558,7 +22,7 @@
       <div class="header-meta-label">Data source</div>
       <div class="header-api-badge">
         <span class="api-dot"></span>
-        restcountries.com
+        250 countries · offline
       </div>
     </div>
   </header>
@@ -572,14 +36,18 @@
         id="search-input"
         placeholder="e.g. Nepal, Japan, Brazil..."
         autocomplete="off"
+        aria-label="Country name"
       >
       <button id="search-btn">
         <span class="search-icon">&#x2315;</span>
         Search
       </button>
     </div>
-    <p id="error"></p>
-    <div id="loading">
+    <div class="search-tools">
+      <p id="error" role="alert"></p>
+      <button id="surprise-btn" title="Show a random country">&#x1F30B; Surprise me</button>
+    </div>
+    <div id="loading" aria-live="polite">
       <div class="spinner"></div>
       fetching data...
     </div>
@@ -589,17 +57,17 @@
   <section class="suggestions-section">
     <div class="suggestions-label">Try these</div>
     <div class="suggestions-row">
-      <button class="suggestion-btn">&#x1F1F5;&#x1F1F0; Pakistan</button>
-      <button class="suggestion-btn">&#x1F1EF;&#x1F1F5; Japan</button>
-      <button class="suggestion-btn">&#x1F1E9;&#x1F1EA; Germany</button>
-      <button class="suggestion-btn">&#x1F1E7;&#x1F1F7; Brazil</button>
-      <button class="suggestion-btn">&#x1F1FF;&#x1F1E6; South Africa</button>
-      <button class="suggestion-btn">&#x1F1E8;&#x1F1E6; Canada</button>
+      <button class="suggestion-btn" data-country="Nepal">&#x1F1F3;&#x1F1F5; Nepal</button>
+      <button class="suggestion-btn" data-country="India">&#x1F1EE;&#x1F1F3; India</button>
+      <button class="suggestion-btn" data-country="Japan">&#x1F1EF;&#x1F1F5; Japan</button>
+      <button class="suggestion-btn" data-country="Germany">&#x1F1E9;&#x1F1EA; Germany</button>
+      <button class="suggestion-btn" data-country="Brazil">&#x1F1E7;&#x1F1F7; Brazil</button>
+      <button class="suggestion-btn" data-country="Canada">&#x1F1E8;&#x1F1E6; Canada</button>
     </div>
   </section>
 
   <!-- RESULT CARD -->
-  <div id="country-card">
+  <div id="country-card" aria-live="polite">
     <div class="card-header">
       <div class="card-name-block">
         <div class="card-eyebrow">&#x2315; Country found</div>
@@ -608,6 +76,7 @@
       </div>
       <div class="flag-wrap">
         <img id="flag" src="https://flagcdn.com/w320/np.png" alt="Country flag">
+        <span class="flag-emoji" id="flagEmoji"></span>
       </div>
     </div>
     <div class="card-body">
@@ -624,12 +93,32 @@
       <div class="stat-cell">
         <span class="stat-icon">&#x1F4B0;</span>
         <div class="stat-label">Currency</div>
-        <div class="stat-value" id="currency">NPR (₨)</div>
+        <div class="stat-value" id="currency">NPR (&#x20A8;)</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-icon">&#x1F5EB;</span>
+        <div class="stat-label">Languages</div>
+        <div class="stat-value" id="languages">Nepali</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-icon">&#x1F5FA;</span>
+        <div class="stat-label">Area</div>
+        <div class="stat-value" id="area">147,181 km&sup2;</div>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-icon">&#x1F4CD;</span>
+        <div class="stat-label">Subregion</div>
+        <div class="stat-value" id="subregion">Southern Asia</div>
       </div>
     </div>
     <div class="card-footer">
       <div class="card-footer-left">status: <span>&#x2713; loaded</span></div>
-      <div class="region-badge" id="region">Asia</div>
+      <div class="footer-chips">
+        <span class="mono-chip" id="calling-code" hidden></span>
+        <span class="mono-chip" id="timezone" hidden></span>
+        <a class="mono-chip link" id="map-link" href="#" target="_blank" rel="noopener noreferrer" hidden>map &#x2197;</a>
+        <span class="region-badge" id="region">Asia</span>
+      </div>
     </div>
   </div>
 
