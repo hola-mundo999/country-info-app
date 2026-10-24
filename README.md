@@ -6,6 +6,10 @@ currency, languages, area, region, calling code, timezone, flag and a map link.
 ## Features
 
 - Search all 250 countries by name (common **or** official), with partial matching (`nep` → Nepal)
+- **Live autocomplete** with `↑ ↓` keyboard navigation, `Enter` to pick, `Esc` to dismiss, and the
+  matched part of each name highlighted
+- **Shareable links** — every result writes `#np`-style deep links to the URL, and a **Copy link**
+  chip copies it, so a country can be bookmarked or sent to someone
 - Instant results: the dataset ships with the app, so there is no API key, rate limit or CORS issue
 - Six data cells per country: capital, population, currency, languages, area, subregion
 - Footer chips: international calling code, primary timezone, "map" link to Google Maps

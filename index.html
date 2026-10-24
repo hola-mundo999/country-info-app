@@ -31,13 +31,20 @@
   <section class="search-section">
     <div class="search-label">Search any country <span>in the world</span></div>
     <div class="search-row">
-      <input
-        type="text"
-        id="search-input"
-        placeholder="e.g. Nepal, Japan, Brazil..."
-        autocomplete="off"
-        aria-label="Country name"
-      >
+      <div class="input-wrap">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="e.g. Nepal, Japan, Brazil..."
+          autocomplete="off"
+          aria-label="Country name"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="suggest-list"
+        >
+        <ul class="suggest-list" id="suggest-list" role="listbox" aria-label="Country suggestions" hidden></ul>
+      </div>
       <button id="search-btn">
         <span class="search-icon">&#x2315;</span>
         Search
@@ -117,6 +124,7 @@
         <span class="mono-chip" id="calling-code" hidden></span>
         <span class="mono-chip" id="timezone" hidden></span>
         <a class="mono-chip link" id="map-link" href="#" target="_blank" rel="noopener noreferrer" hidden>map &#x2197;</a>
+        <button class="mono-chip chip-btn" id="copy-link" type="button" title="Copy a link to this country">link &#x29C9;</button>
         <span class="region-badge" id="region">Asia</span>
       </div>
     </div>

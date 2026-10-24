@@ -146,7 +146,8 @@ body::before {
   background: #fff;
   border: 1.5px solid var(--border);
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
   box-shadow: var(--shadow-md);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -156,8 +157,16 @@ body::before {
   box-shadow: 0 0 0 4px var(--accent-dim), var(--shadow-md);
 }
 
+.input-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
 #search-input {
   flex: 1;
+  width: 100%;
   border: none;
   outline: none;
   padding: 18px 22px;
@@ -192,6 +201,8 @@ body::before {
   gap: 8px;
   white-space: nowrap;
 }
+
+#search-btn { border-radius: 0 12px 12px 0; }
 
 #search-btn:hover { background: var(--accent); }
 #search-btn:active { transform: scale(0.98); }
@@ -610,4 +621,91 @@ body::before {
   .card-body { grid-template-columns: 1fr; }
   .stat-cell { border-right: none !important; border-bottom: 1.5px solid var(--border); }
   .stat-cell:last-child { border-bottom: none; }
+}
+
+/* ── autocomplete ── */
+.suggest-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  max-height: 290px;
+  overflow-y: auto;
+  animation: fadeDown 0.16s ease both;
+}
+
+.suggest-list[hidden] { display: none; }
+
+.suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.suggest-item .suggest-flag { font-size: 17px; line-height: 1; }
+
+.suggest-item .suggest-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.suggest-item .suggest-name mark {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+.suggest-item .suggest-region {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+
+.suggest-item:hover,
+.suggest-item[aria-selected="true"] {
+  background: var(--accent-dim);
+}
+
+.suggest-item[aria-selected="true"] .suggest-region { color: var(--accent); }
+
+.suggest-empty {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+/* copy-link chip is a button, so normalise it */
+.chip-btn {
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.chip-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip-btn.copied {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+@media (max-width: 600px) {
+  .suggest-list { max-height: 240px; }
 }
